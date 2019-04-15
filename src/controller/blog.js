@@ -34,7 +34,6 @@ const newBlog = (blogData ={}) => {
     `
 
     return exec(sql).then(insertData => {
-        // console.log('insertData is ', insertData)
         return {
             id: insertData.insertId
         }
@@ -45,7 +44,6 @@ const newBlog = (blogData ={}) => {
 }
 
 const updateBlog = (id, blogData = {}) => {
-    // console.log(blogData)
 
     const title = blogData.title
     const content = blogData.content
@@ -53,7 +51,6 @@ const updateBlog = (id, blogData = {}) => {
         update blogs set title='${title}', content='${content}' where id=${id}
     `
     return exec(sql).then(updateData => {
-        // console.log('updateData is ', updateData)
         if(updateData.affectedRows > 0){
             return true
         }
