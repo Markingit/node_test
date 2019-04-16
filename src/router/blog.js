@@ -1,6 +1,15 @@
 const { getList, getDetail, newBlog, updateBlog, delBlog } = require('../controller/blog')
 const { SuccessModel, ErrorModel } = require('../model/resModel')
 
+// 统一的登陆验证函数
+const loginCheck = (req) => {
+    if (!req.session.username) {
+        return Promise.resolve(
+            new ErrorModel('尚未登陆')
+        )
+    }
+}
+
 const handleBlogRouter = (req, res) => {
     const method = req.method
     const id = req.query.id
@@ -10,11 +19,18 @@ const handleBlogRouter = (req, res) => {
 
     // 获取博客列表
     if(method === 'GET' && req.path ==='/api/blog/list'){
-        const author = req.query.author || ''
+        let author = req.query.author || ''
         const keyword = req.query.keyword || ''
         // const listData = getList(author, keyword)
 
         // return new SuccessModel(listData)
+        if(req.query.isadmin){
+            const loginCheckResult = loginCheck(req)
+            if(loginCheckResult){
+                return loginCheckResult
+            }
+            author = req.session.username
+        }
         const result = getList(author, keyword)
 
         return result.then(listData => {
@@ -37,7 +53,12 @@ const handleBlogRouter = (req, res) => {
     if(method === 'POST' && req.path ==='/api/blog/new'){
         // const data = newBlog(req.body)
         // return new SuccessModel(data)
-        const author = 'Mark' // 假数据
+        const loginCheckResult = loginCheck(req)
+        if(loginCheckResult){
+            return loginCheckResult
+        }
+
+        const author = req.session.username
         req.body.author = author
         const result = newBlog(req.body)
         return result.then(data => {
@@ -49,6 +70,12 @@ const handleBlogRouter = (req, res) => {
 
     // 更新博客
     if(method === 'POST' && req.path ==='/api/blog/update'){
+        
+        const loginCheckResult = loginCheck(req)
+        if(loginCheckResult){
+            return loginCheckResult
+        }
+        
         const result = updateBlog(id, req.body)
 
         return result.then(val => {
@@ -62,7 +89,12 @@ const handleBlogRouter = (req, res) => {
 
      // 删除博客
      if(method === 'POST' && req.path ==='/api/blog/del'){
-        const author = 'Mark' // 假数据
+        const loginCheckResult = loginCheck(req)
+        if(loginCheckResult){
+            return loginCheckResult
+        }
+        
+        const author = req.session.username
         const result = delBlog(id, author)
 
         return result.then(val => {
